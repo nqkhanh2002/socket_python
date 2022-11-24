@@ -7,9 +7,9 @@ from torch import true_divide
 def clientThread(clientSocket, clientAddress):
     while True:
         try:
-            data = clientSocket.recv(1024).decode()
+            data = clientSocket.recv(1024).decode(FORMAT)
             if data:
-                clientSocket.send(data).encode()
+                clientSocket.send(data).encode(FORMAT)
             else:
                 raise error('Client disconnected')
         except:
@@ -29,7 +29,7 @@ s.listen()
 
 print("SERVER SIDE")
 print("server:", HOST, SERVER_PORT)
-print("Waiting for Client")
+print("Waiting for Client...")
 
 while True:
     clientSocket, clientAddress = s.accept()
