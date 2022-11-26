@@ -8,14 +8,15 @@ from tzlocal import get_localzone
 # importing strftime function to
 # retrieve system's time
 from time import strftime
-
+import socket
 from pytz_deprecation_shim import timezone
 # import for socket
 import socket
 
-HOST = "127.0.0.1" # Địa chỉ ip trỏ về máy chủ
+HOST = "172.17.14.165" # Địa chỉ ip trỏ về máy chủ
 SERVER_PORT = 65432 # > 50000 , Port 
-FORMAT = "utf8"
+FORMAT = "utf-8"
+
 
 
 
@@ -25,27 +26,25 @@ client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Trên client sẽ có 1 socket đang lắng nghe
 server_address = (HOST, SERVER_PORT)
 client.connect(server_address)
+print("Connected to server")
 
 def sendTimezone():
-    _timezone = cmb1.get()
-    client.send(_timezone.encode(FORMAT))
     notSelect['text'] = "Selected Timezone"
+    _timezone = cmb1.get()
+    client.sendto(_timezone.encode(FORMAT), (HOST, SERVER_PORT) )  
+    
 def receiveTimezone():
     while True:
-        _timezone = client.recv(1024).decode(FORMAT)
-        return _timezone
+        msg = client.recv(1024).decode(FORMAT)
+        print(msg)
+        
+        # _time = _timezone
         # if _timezone:
         #     print(_timezone)
         #     time()
         #     break
-
-root = Tk()
-root.title("Timezone | Connected to " + HOST + ":" + str(SERVER_PORT))
-root.geometry("800x550") # Size of the window
-image_icon = PhotoImage(file="clock.png") 
-root.iconphoto(False, image_icon)
-
 def times():
+    _timezone = cmb1.get()
     home = pytz.timezone(_timezone)
     local_time = datetime.now(home)
     string = local_time.strftime('%a %H:%M:%S %p %d-%m-%Y')
@@ -79,9 +78,15 @@ def times():
     current_time = local_time.strftime('%H:%M:%S')
     clock4.config(text = current_time)
     name4.config(text = "Tokyo")
-    clock4.after(200, times)
+    root.after(200, times)
+    
+root = Tk()
+root.title("Timezone | Connected to " + HOST + ":" + str(SERVER_PORT))
+root.geometry("800x550") # Size of the window
+image_icon = PhotoImage(file="clock.png") 
+root.iconphoto(False, image_icon)
 
-name1 = Label(root, font = ("times", 20, 'bold'))
+name1 = Label(root, font = ("times", 20, 'b`old'))
 name1.place(x = 120, y = 200)
 clock1 = Label(root, font = ('times', 25, 'bold'))
 clock1.place(x = 130, y = 250)
@@ -108,8 +113,8 @@ clock4 = Label(root, font = ('times', 25, 'bold'))
 clock4.place(x = 570, y = 450)
 nota4 = Label(root, text = "Hours Minutes Seconds", font = ("times", 15, 'bold'))
 nota4.place(x = 550, y = 500)
-
-_timezone  = receiveTimezone()
+_timezone = "Asia/Ho_Chi_Minh"
+# receiveTimezone(_timezone)
 # _timezone = "Asia/Ho_Chi_Minh"
 name = timezone(_timezone).zone
 lbl = Label(root, font = ('calibri', 40, 'bold'),
@@ -126,11 +131,9 @@ cmb1.place(x=200, y=150)
 notSelect = Label(root,text="Not Selected", font = ('calibri', 20, 'bold'))
 notSelect.place(x=570, y=125)
 btnSelect = Button(root, text = "Select", command = sendTimezone)
-    
-times()
 
-recvThread = threading.Thread(target=receiveTimezone)   
-recvThread.daemon = True
-recvThread.start()
+# times()
 
+threading.Thread(target=receiveTimezone, daemon=True).start()  
+root.after(200, times)
 root.mainloop()
