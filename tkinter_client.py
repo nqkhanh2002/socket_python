@@ -23,7 +23,7 @@ FORMAT = "utf8"
 root = Tk()
 root.title("Timezone | Connected to " + HOST + ":" + str(SERVER_PORT))
 root.geometry("800x200")
-image_icon = PhotoImage(file="socket_python\clock.png")
+image_icon = PhotoImage(file="clock.png")
 root.iconphoto(False, image_icon)
 
 _timezone = "Asia/Ho_Chi_Minh"
